@@ -1,9 +1,8 @@
 package controllers
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
-	"reflect"
 	"time"
 
 	"example.com/m/models"
@@ -53,12 +52,6 @@ func GetMasthead(c *gin.Context) {
 func UpdateMasthead(c *gin.Context) {
 	var masthead models.Masthead
 
-	tmp := c.Request.FormValue("order")
-	fmt.Println(reflect.TypeOf(tmp))
-	if tmp == "" {
-		fmt.Print("hey!")
-	}
-
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,30 +64,11 @@ func UpdateMasthead(c *gin.Context) {
 		return
 	}
 
-	// models.DB.Model(&masthead).Updates(map[string]interface{}{
-	// 	"ImageURL": input.ImageURL,
-	// 	"Link":     input.Link,
-	// 	"Order":    input.Order,
-	// 	"Status":   input.Status,
-	// })
+	var data map[string]interface{}
+	tmpData, _ := json.Marshal(input)
+	json.Unmarshal(tmpData, &data)
 
-	fmt.Println(input)
-
-	var m = map[string]interface{}{
-		"ImageURL": input.ImageURL,
-		"Link":     input.Link,
-		"Order":    input.Order,
-		"Status":   input.Status,
-	}
-
-	for k, v := range m {
-		if v == 0 {
-			delete(m, k)
-		}
-	}
-
-	fmt.Println(m)
-	models.DB.Model(&masthead).Updates(m)
+	models.DB.Model(&masthead).Updates(data)
 
 	c.JSON(http.StatusOK, gin.H{"data": masthead})
 }
