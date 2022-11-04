@@ -23,7 +23,6 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/mastheads/:id", controllers.GetMasthead)
 
-	//TODO: reflect: call of reflect.Value.SetString on uint Value
 	r.PATCH("/mastheads/:id", controllers.UpdateMasthead)
 
 	r.DELETE("/mastheads/:id", controllers.DeleteMasthead)

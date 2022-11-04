@@ -8,8 +8,8 @@ type CreateMastheadInput struct {
 }
 
 type UpdateMastheadInput struct {
-	ImageURL string `json:"image_url,omitempty"`
-	Link     string `json:"link,omitempty"`
-	Order    int    `json:"order,omitempty"`
-	Status   int    `json:"status,omitempty"`
+	ImageURL *string `json:"image_url,omitempty"`
+	Link     *string `json:"link,omitempty"`
+	Order    *int    `json:"order,omitempty"`
+	Status   *int    `json:"status,omitempty"`
 }
