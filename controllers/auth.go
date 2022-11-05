@@ -25,6 +25,7 @@ func GenerateToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
+// TODO: put the secret key in the .env file
 var jwtKey = []byte("supersecretkey")
 
 type JWTClaim struct {
