@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -39,6 +40,7 @@ func CreateMasthead(c *gin.Context) {
 }
 
 func GetMasthead(c *gin.Context) {
+	log.Printf("%v", c.Request.Header)
 	var masthead models.Masthead
 
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
@@ -64,6 +66,8 @@ func UpdateMasthead(c *gin.Context) {
 		return
 	}
 
+	// Dùng Marshal để chuyển những key không có giá trị, hoặc không tồn tại trên response về nil
+	// Sau đó dùng Unmarshal để remove những key có giá trị nil ra khỏi interface
 	var data map[string]interface{}
 	tmpData, _ := json.Marshal(input)
 	json.Unmarshal(tmpData, &data)
