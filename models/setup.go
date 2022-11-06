@@ -22,11 +22,13 @@ func ConnectionDatabase() {
 	}
 
 	database.AutoMigrate(&Masthead{})
+	database.AutoMigrate(&Client{})
 
 	DB = database
 }
 
 func dsn(dbName string) string {
+	//TODO: move config to .env file
 	const (
 		MYSQL_PORT          = "3306"
 		MYSQL_ROOT_PASSWORD = "root"

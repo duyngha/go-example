@@ -22,23 +22,23 @@ func setupRouter() *gin.Engine {
 		c.JSON(http.StatusOK, gin.H{"data": "Hello, world!"})
 	})
 
-	r.GET("/mastheads", controllers.GetMastheads)
+	r.POST("/auth/token", controllers.GenerateToken)
 
-	r.POST("/mastheads", controllers.CreateMasthead)
-
-	r.GET("/mastheads/:id", controllers.GetMasthead)
-
-	r.PATCH("/mastheads/:id", controllers.UpdateMasthead)
-
-	r.DELETE("/mastheads/:id", controllers.DeleteMasthead)
-
-	r.POST("/token", controllers.GenerateToken)
-
-	secured := r.Group("/logged").Use(middlewares.Auth())
+	secured := r.Group("/api").Use(middlewares.Auth())
 	{
 		secured.GET("/test", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"success": true})
 		})
+
+		secured.GET("/mastheads", controllers.GetMastheads)
+
+		secured.POST("/mastheads", controllers.CreateMasthead)
+
+		secured.GET("/mastheads/:id", controllers.GetMasthead)
+
+		secured.PATCH("/mastheads/:id", controllers.UpdateMasthead)
+
+		secured.DELETE("/mastheads/:id", controllers.DeleteMasthead)
 	}
 
 	return r

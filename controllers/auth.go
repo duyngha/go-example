@@ -5,17 +5,41 @@ import (
 	"net/http"
 	"time"
 
+	"example.com/m/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
+// TODO: put the secret key in the .env file
+var jwtKey = []byte("supersecretkey")
+
+type JWTClaim struct {
+	Name   string `json:"name"`
+	KeyID  string `json:"key_id"`
+	Secret string `json:"secret"`
+	jwt.StandardClaims
+}
+
 type TokenRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name   string `json:"name"`
+	KeyID  string `json:"key_id"`
+	Secret string `json:"secret"`
 }
 
 func GenerateToken(c *gin.Context) {
-	tokenString, err := GenerateJWT("Duy", "123")
+	var input TokenRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var client models.Client
+	if err := models.DB.Where("key_id = ?", input.KeyID).Where("secret = ?", input.Secret).First(&client).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tokenString, err := GenerateJWT(client.Name, client.KeyID, client.Secret)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -25,19 +49,12 @@ func GenerateToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
-var jwtKey = []byte("supersecretkey")
-
-type JWTClaim struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	jwt.StandardClaims
-}
-
-func GenerateJWT(email string, username string) (tokenString string, err error) {
+func GenerateJWT(name string, key string, secret string) (tokenString string, err error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &JWTClaim{
-		Email:    email,
-		Username: username,
+		Name:   name,
+		KeyID:  key,
+		Secret: secret,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
