@@ -19,7 +19,7 @@ func setupRouter() *gin.Engine {
 	models.ConnectionDatabase()
 
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": "Hello, world!"})
+		c.JSON(http.StatusOK, gin.H{"data": "Hello, Go!"})
 	})
 
 	r.POST("/auth/token", controllers.GenerateToken)
