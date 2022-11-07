@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"example.com/m/controllers"
+	"example.com/m/internal/controllers"
 	"github.com/gin-gonic/gin"
 )
 
