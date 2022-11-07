@@ -1,11 +1,11 @@
-package routes
+package api
 
 import (
 	"net/http"
 
-	"example.com/m/controllers"
-	"example.com/m/middlewares"
-	"example.com/m/models"
+	"example.com/m/internal/controllers"
+	"example.com/m/internal/middlewares"
+	"example.com/m/internal/models"
 	"github.com/gin-gonic/gin"
 )
 

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"example.com/m/models"
-	"example.com/m/requests"
+	"example.com/m/internal/models"
+	"example.com/m/internal/requests"
 	"github.com/gin-gonic/gin"
 )
 

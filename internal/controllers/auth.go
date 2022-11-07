@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"example.com/m/models"
+	"example.com/m/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )

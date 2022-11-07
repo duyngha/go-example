@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"example.com/m/models"
+	"example.com/m/internal/models"
 	"github.com/google/uuid"
 )
 

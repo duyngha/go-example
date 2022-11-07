@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"example.com/m/internal/models"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -19,8 +20,8 @@ func ConnectionDatabase() {
 		panic("Failed to connect to database")
 	}
 
-	database.AutoMigrate(&Masthead{})
-	database.AutoMigrate(&Client{})
+	database.AutoMigrate(&models.Masthead{})
+	database.AutoMigrate(&models.Client{})
 
 	DB = database
 }

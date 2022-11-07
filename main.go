@@ -1,10 +1,10 @@
 package main
 
 import (
-	"example.com/m/routes"
+	"example.com/m/pkg/api"
 )
 
 func main() {
-	r := routes.Router()
+	r := api.Router()
 	r.Run(":3000")
 }
