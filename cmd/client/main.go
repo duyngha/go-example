@@ -6,17 +6,18 @@ import (
 	"log"
 	"time"
 
+	"example.com/m/internal/databases"
 	"example.com/m/internal/models"
 	"github.com/google/uuid"
 )
 
 func main() {
-	models.ConnectionDatabase()
+	databases.ConnectionDatabase()
 
 	//TODO: Determine client name from request or something
 	client := clientGenerator("client_1")
 
-	result := models.DB.Create(&client)
+	result := databases.DB.Create(&client)
 
 	if result != nil {
 		return
