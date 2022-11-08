@@ -1,15 +1,19 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"example.com/m/internal/databases"
 	"example.com/m/internal/models"
 	"example.com/m/internal/requests"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 )
 
@@ -93,6 +97,38 @@ func DeleteMasthead(c *gin.Context) {
 }
 
 func UploadImage(c *gin.Context) {
-	file, _ := c.FormFile("file")
-	fmt.Printf("%v\n", file)
+	// Load the Shared AWS Configuration (~/.aws/config)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//TODO: Config S3 configuration
+	client := s3.NewFromConfig(cfg)
+
+	file, fileHeader, err := c.Request.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	bucket := os.Getenv("AWS_BUCKET")
+
+	//TODO: Get extension from file upload header
+	ext := "image/jpeg"
+
+	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      &bucket,
+		Key:         &fileHeader.Filename,
+		Body:        file,
+		ContentType: &ext,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else {
+		fmt.Println("OK!")
+	}
 }
