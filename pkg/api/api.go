@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"example.com/m/internal/controllers"
+	"example.com/m/internal/databases"
 	"example.com/m/internal/middlewares"
-	"example.com/m/internal/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,13 +16,15 @@ func Router() *gin.Engine {
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
-	models.ConnectionDatabase()
+	databases.ConnectionDatabase()
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": "Hello, Go!"})
 	})
 
 	r.POST("/auth/token", controllers.GenerateToken)
+
+	r.POST("/upload", controllers.UploadImage)
 
 	secured := r.Group("/api").Use(middlewares.Auth())
 	{

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"example.com/m/internal/databases"
 	"example.com/m/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -34,7 +35,7 @@ func GenerateToken(c *gin.Context) {
 	}
 
 	var client models.Client
-	if err := models.DB.Where("key_id = ?", input.KeyID).Where("secret = ?", input.Secret).First(&client).Error; err != nil {
+	if err := databases.DB.Where("key_id = ?", input.KeyID).Where("secret = ?", input.Secret).First(&client).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
