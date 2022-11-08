@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"example.com/m/internal/databases"
 	"example.com/m/internal/models"
 	"example.com/m/internal/requests"
 	"github.com/gin-gonic/gin"
@@ -13,7 +15,7 @@ import (
 
 func GetMastheads(c *gin.Context) {
 	var mastheads []models.Masthead
-	models.DB.Find(&mastheads)
+	databases.DB.Find(&mastheads)
 
 	c.JSON(http.StatusOK, gin.H{"data": mastheads})
 }
@@ -34,7 +36,7 @@ func CreateMasthead(c *gin.Context) {
 		Order:     input.Order,
 		Status:    input.Status,
 	}
-	models.DB.Create(&masthead)
+	databases.DB.Create(&masthead)
 
 	c.JSON(http.StatusOK, gin.H{"data": masthead})
 }
@@ -43,7 +45,7 @@ func GetMasthead(c *gin.Context) {
 	log.Printf("%v", c.Request.Header)
 	var masthead models.Masthead
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
+	if err := databases.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -54,7 +56,7 @@ func GetMasthead(c *gin.Context) {
 func UpdateMasthead(c *gin.Context) {
 	var masthead models.Masthead
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
+	if err := databases.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -72,7 +74,7 @@ func UpdateMasthead(c *gin.Context) {
 	tmpData, _ := json.Marshal(input)
 	json.Unmarshal(tmpData, &data)
 
-	models.DB.Model(&masthead).Updates(data)
+	databases.DB.Model(&masthead).Updates(data)
 
 	c.JSON(http.StatusOK, gin.H{"data": masthead})
 }
@@ -80,12 +82,17 @@ func UpdateMasthead(c *gin.Context) {
 func DeleteMasthead(c *gin.Context) {
 	var masthead models.Masthead
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
+	if err := databases.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	models.DB.Delete(&masthead)
+	databases.DB.Delete(&masthead)
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+func UploadImage(c *gin.Context) {
+	file, _ := c.FormFile("file")
+	fmt.Printf("%v\n", file)
 }
