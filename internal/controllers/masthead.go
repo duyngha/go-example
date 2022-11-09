@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"example.com/m/internal/databases"
+	"example.com/m/internal/helpers"
 	"example.com/m/internal/models"
 	"example.com/m/internal/requests"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -113,7 +113,7 @@ func UploadImage(c *gin.Context) {
 		return
 	}
 
-	bucket := os.Getenv("AWS_BUCKET")
+	bucket := helpers.Env("AWS_BUCKET")
 
 	//TODO: Get extension from file upload header
 	ext := "image/jpeg"
