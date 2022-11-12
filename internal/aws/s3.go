@@ -5,15 +5,17 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"example.com/m/internal/helpers"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 )
 
-func Upload(c *gin.Context) (err error) {
+func Upload(c *gin.Context, path string) (err error) {
 	client := uploader()
 
 	file, fileHeader, err := c.Request.FormFile("file")
@@ -28,20 +30,28 @@ func Upload(c *gin.Context) (err error) {
 		return err
 	}
 
-	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+	uploader := manager.NewUploader(client)
+
+	// result, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
+	// 	Bucket:      &bucket,
+	// 	Key:         &fileHeader.Filename,
+	// 	Body:        file,
+	// 	ContentType: &fileType,
+	// })
+
+	pathFile := strings.Trim(path, "/") + "/" + fileHeader.Filename
+
+	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:      &bucket,
-		Key:         &fileHeader.Filename,
+		Key:         &pathFile,
 		Body:        file,
 		ContentType: &fileType,
 	})
 
 	//TODO: Retrieve the object URL from the bucket
-	return err
-}
+	log.Print(getFileURL(result))
 
-type AwsCfg struct {
-	AccessKeyID     string
-	SecretAccessKey string
+	return err
 }
 
 // https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/
@@ -70,4 +80,8 @@ func getFileType(file multipart.File) (fileType string, err error) {
 
 	fileType = http.DetectContentType(buff)
 	return fileType, err
+}
+
+func getFileURL(output *manager.UploadOutput) (url string) {
+	return strings.Replace(output.Location, "https://s3."+helpers.Env("AWS_DEFAULT_REGION")+".amazonaws.com/"+helpers.Env("AWS_BUCKET")+"/", helpers.Env("AWS_CDN_URL")+"/", -1)
 }

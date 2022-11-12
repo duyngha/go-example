@@ -94,7 +94,7 @@ func DeleteMasthead(c *gin.Context) {
 }
 
 func UploadImage(c *gin.Context) {
-	err := aws.Upload(c)
+	err := aws.Upload(c, "banners/")
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
