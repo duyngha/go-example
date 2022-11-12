@@ -8,19 +8,13 @@ import (
 
 	"example.com/m/internal/helpers"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 )
 
 func Upload(c *gin.Context) (err error) {
-	// Load the Shared AWS Configuration (~/.aws/config)
-	cfg, err := config.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//TODO: Config S3 configuration
-	client := s3.NewFromConfig(cfg)
+	client := uploader()
 
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
@@ -41,21 +35,35 @@ func Upload(c *gin.Context) (err error) {
 		ContentType: &fileType,
 	})
 
+	//TODO: Retrieve the object URL from the bucket
 	return err
 }
 
-//func uploader() *s3manager.Uploader {
-// s3Config := &aws.Config{
-// 	Region:      aws.String(os.Getenv("AWS_DEFAULT_REGION")),
-// 	Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), ""),
-// }
+type AwsCfg struct {
+	AccessKeyID     string
+	SecretAccessKey string
+}
 
-// s3Session := session.New(s3Config)
+// https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/
+func uploader() *s3.Client {
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		config.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(
+				helpers.Env("AWS_ACCESS_KEY_ID"),
+				helpers.Env("AWS_SECRET_ACCESS_KEY"),
+				""),
+		),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// uploader := s3manager.NewUploader(s3Session)
-// return uploader
-//}
+	client := s3.NewFromConfig(cfg)
+	return client
+}
 
+// https://freshman.tech/file-upload-golang/
 func getFileType(file multipart.File) (fileType string, err error) {
 	buff := make([]byte, 512)
 	_, err = file.Read(buff)
