@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -94,12 +93,12 @@ func DeleteMasthead(c *gin.Context) {
 }
 
 func UploadImage(c *gin.Context) {
-	err := aws.Upload(c, "banners/")
+	url, err := aws.Upload(c, "banners/")
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	} else {
-		fmt.Println("OK!")
+		c.JSON(http.StatusOK, gin.H{"success": url})
 	}
 }

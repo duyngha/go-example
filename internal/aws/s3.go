@@ -15,19 +15,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Upload(c *gin.Context, path string) (err error) {
+func Upload(c *gin.Context, path string) (url string, err error) {
 	client := uploader()
 
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	bucket := helpers.Env("AWS_BUCKET")
 
 	fileType, err := getFileType(file)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	uploader := manager.NewUploader(client)
@@ -48,10 +48,12 @@ func Upload(c *gin.Context, path string) (err error) {
 		ContentType: &fileType,
 	})
 
-	//TODO: Retrieve the object URL from the bucket
-	log.Print(getFileURL(result))
+	url = getFileURL(result)
 
-	return err
+	//TODO: we should return the path which store the file instead of the full URL of file
+	//if we do, we must find a way to retrieve the URL from the path of file which stored in the database
+
+	return
 }
 
 // https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/
