@@ -1,17 +1,47 @@
 package aws
 
-func Upload() {
-	// input := &s3manager.UploadInput{
-	// 	Bucket:      aws.String(os.Getenv("AWS_BUCKET")),
-	// 	Key:         aws.String(path),
-	// 	Body:        file,
-	// 	ContentType: aws.String("image/jpg"),
-	// }
+import (
+	"context"
+	"log"
+	"mime/multipart"
+	"net/http"
 
-	// output, err := uploader().UploadWithContext(context.Background(), input)
+	"example.com/m/internal/helpers"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/gin-gonic/gin"
+)
 
-	// log.Printf("res %v\n", output)
-	// log.Printf("err %v\n", err)
+func Upload(c *gin.Context) (err error) {
+	// Load the Shared AWS Configuration (~/.aws/config)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//TODO: Config S3 configuration
+	client := s3.NewFromConfig(cfg)
+
+	file, fileHeader, err := c.Request.FormFile("file")
+	if err != nil {
+		return err
+	}
+
+	bucket := helpers.Env("AWS_BUCKET")
+
+	fileType, err := getFileType(file)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      &bucket,
+		Key:         &fileHeader.Filename,
+		Body:        file,
+		ContentType: &fileType,
+	})
+
+	return err
 }
 
 //func uploader() *s3manager.Uploader {
@@ -25,3 +55,11 @@ func Upload() {
 // uploader := s3manager.NewUploader(s3Session)
 // return uploader
 //}
+
+func getFileType(file multipart.File) (fileType string, err error) {
+	buff := make([]byte, 512)
+	_, err = file.Read(buff)
+
+	fileType = http.DetectContentType(buff)
+	return fileType, err
+}
