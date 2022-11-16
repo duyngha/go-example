@@ -1,10 +1,12 @@
 package requests
 
+import "mime/multipart"
+
 type CreateMastheadInput struct {
-	ImageURL string `json:"image_url" binding:"required"`
-	Link     string `json:"link" binding:"required"`
-	Order    int    `json:"order"`
-	Status   int    `json:"status"`
+	ImageURL *multipart.FileHeader `form:"image_url" binding:"required"`
+	Link     string                `form:"link" binding:"required"`
+	Order    int                   `form:"order"`
+	Status   int                   `form:"status"`
 }
 
 type UpdateMastheadInput struct {

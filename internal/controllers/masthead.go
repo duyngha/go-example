@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -23,13 +22,19 @@ func GetMastheads(c *gin.Context) {
 func CreateMasthead(c *gin.Context) {
 	var input requests.CreateMastheadInput
 
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if err := c.ShouldBind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var imageUrl, err = aws.Upload(c, "banners", "image_url")
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	masthead := models.Masthead{
-		ImageURL:  input.ImageURL,
+		ImageURL:  imageUrl,
 		Link:      input.Link,
 		StartTime: time.Now(),
 		EndTime:   time.Now(),
@@ -42,13 +47,14 @@ func CreateMasthead(c *gin.Context) {
 }
 
 func GetMasthead(c *gin.Context) {
-	log.Printf("%v", c.Request.Header)
 	var masthead models.Masthead
 
 	if err := databases.DB.Where("id = ?", c.Param("id")).First(&masthead).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	masthead.ImageURL = aws.GetFileURLWithCDN(masthead.ImageURL)
 
 	c.JSON(http.StatusOK, gin.H{"data": masthead})
 }
@@ -93,7 +99,7 @@ func DeleteMasthead(c *gin.Context) {
 }
 
 func UploadImage(c *gin.Context) {
-	url, err := aws.Upload(c, "banners/")
+	url, err := aws.Upload(c, "banners/", "file")
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
