@@ -15,43 +15,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Upload(c *gin.Context, path string) (url string, err error) {
+func Upload(c *gin.Context, path string, key string) (pathFile string, err error) {
 	client := uploader()
 
-	file, fileHeader, err := c.Request.FormFile("file")
+	file, fileHeader, err := c.Request.FormFile(key)
 	if err != nil {
-		return "", err
+		return "can not read the file.", err
 	}
 
 	bucket := helpers.Env("AWS_BUCKET")
 
 	fileType, err := getFileType(file)
 	if err != nil {
-		return "", err
+		return "can not get the file extension", err
 	}
 
+	pathFile = strings.Trim(path, "/") + "/" + fileHeader.Filename
+
 	uploader := manager.NewUploader(client)
-
-	// result, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
-	// 	Bucket:      &bucket,
-	// 	Key:         &fileHeader.Filename,
-	// 	Body:        file,
-	// 	ContentType: &fileType,
-	// })
-
-	pathFile := strings.Trim(path, "/") + "/" + fileHeader.Filename
-
-	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:      &bucket,
 		Key:         &pathFile,
 		Body:        file,
 		ContentType: &fileType,
 	})
-
-	url = getFileURL(result)
-
-	//TODO: we should return the path which store the file instead of the full URL of file
-	//if we do, we must find a way to retrieve the URL from the path of file which stored in the database
 
 	return
 }
@@ -84,6 +71,10 @@ func getFileType(file multipart.File) (fileType string, err error) {
 	return fileType, err
 }
 
-func getFileURL(output *manager.UploadOutput) (url string) {
-	return strings.Replace(output.Location, "https://s3."+helpers.Env("AWS_DEFAULT_REGION")+".amazonaws.com/"+helpers.Env("AWS_BUCKET")+"/", helpers.Env("AWS_CDN_URL")+"/", -1)
+// func getFileURL(output *manager.UploadOutput) (url string) {
+// 	return strings.Replace(output.Location, "https://s3."+helpers.Env("AWS_DEFAULT_REGION")+".amazonaws.com/"+helpers.Env("AWS_BUCKET")+"/", helpers.Env("AWS_CDN_URL")+"/", -1)
+// }
+
+func GetFileURLWithCDN(path string) string {
+	return helpers.Env("AWS_CDN_URL") + "/" + path
 }
