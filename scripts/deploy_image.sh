@@ -24,7 +24,7 @@ aws ecr describe-repositories
 
 docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:$BRANCH_NAME-latest
 
-if [ "$BRANCH_NAME" == "service-banner-main" ]; then
+if [ "$BRANCH_NAME" == "service-banner-master" ]; then
     docker run -p 5005:80 -d --name $BRANCH_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_NAME:$BRANCH_NAME-latest
     docker exec $BRANCH_NAME bash -c "cp scripts/env/.env.dev.5009 .env"
 fi
