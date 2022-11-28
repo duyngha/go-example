@@ -13,7 +13,7 @@ IMAGE_REGISTRY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 REPOSITORY_URI=$IMAGE_REGISTRY/$IMAGE_NAME
 
 echo Building the Docker image...
-if [ "$BRANCH_NAME" == "main" ]; then
+if [ "$BRANCH_NAME" == "service-banner-master" ]; then
     docker build --build-arg DEV_ENV=stage -t $REPOSITORY_URI:$BRANCH_NAME-latest .
 fi
 
